@@ -23,9 +23,13 @@
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^5.2.0",
     "mocha": "^9.1.3",
+    "node-ts": "^5.1.2",
     "nyc": "^15.1.0",
     "prettier": "^2.5.1",
     "ts-node": "^10.4.0",
     "typescript": "^4.5.5"
+  },
+  "dependencies": {
+    "@liuxingfeiyu/okex-node": "^0.0.52"
   }
 }

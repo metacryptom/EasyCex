@@ -1,8 +1,8 @@
 export const Greeter = (name: string) => `Hello ${name}`
 const a = 'HH'
 
-class Test {}
+class Test { }
 
-console.log('here')
+console.log('herelu')
 
 const i: number = 0
