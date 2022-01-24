@@ -32,7 +32,6 @@
     "typescript": "^4.5.5"
   },
   "dependencies": {
-    "@liuxingfeiyu/okex-node": "^0.0.52",
     "ts-interface-checker": "^1.0.2"
   }
 }
