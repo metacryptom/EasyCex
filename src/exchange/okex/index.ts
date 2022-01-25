@@ -12,28 +12,30 @@ import { PublicClient } from './PublicClient'
 import { createCheckers, Checker } from 'ts-interface-checker'
 import okexTI from '../protocol/okex.protocol-ti'
 import { ProtocolCheckerType } from '../protocol/okex.protocol'
+import { HttpClient } from './httpclient'
 
 export class OkexMarketFetcher implements MarketFetcher {
   readonly pair: Pair
-  readonly pairName: String
+  readonly pairName: string
   readonly exchangeType: ExchageType
   checkers: { [key in ProtocolCheckerType]: Checker }
 
-  pbIns: any
+  pbIns: HttpClient
 
   constructor(pair: Pair, opt?: ExchageOption) {
     this.exchangeType = ExchageType.Okex
-    this.pbIns = PublicClient(opt?.addr, 5000, { timeout: 500 })
+    this.pbIns = new HttpClient(opt?.addr || 'https://www.okex.com', 3000, { timeout: 3000 })
     this.pairName = `${pair.target.name.toLocaleUpperCase()}-${pair.anchor.name.toLocaleUpperCase()}`
-    const { IDepthResult } = createCheckers(okexTI)
-    this.checkers = { [ProtocolCheckerType.QueryDepthResult]: IDepthResult }
+    const { IDepthResult, Instruments } = createCheckers(okexTI)
+    this.checkers = {
+      [ProtocolCheckerType.QueryDepthResult]: IDepthResult,
+      [ProtocolCheckerType.QueryInstruments]: Instruments,
+    }
   }
 
   async queryDepth(opt?: QueryDepthOption): Promise<QueryDepthResult> {
     try {
-      const depth = await this.pbIns
-        .spot()
-        .getSpotBook(this.pairName, { size: opt?.size.toString() || '10' /* ,depth:0.1 */ })
+      const depth = await this.pbIns.get(this.pairName, { size: opt?.size.toString() || '10' /* ,depth:0.1 */ })
       const res = new QueryDepthResult()
       this.checkers[ProtocolCheckerType.QueryDepthResult].check(res)
 
@@ -47,18 +49,28 @@ export class OkexMarketFetcher implements MarketFetcher {
         }
         return res
       } else {
+        return null
       }
     } catch (err) {
       console.log('InQueryDepth err is ', err)
       return null
     }
   }
+
+  async queryInstruments(param?: { readonly instType?: string; readonly instId?: string }) {
+    const defaultParam = { instType: 'SPOT' }
+    const res = await this.pbIns.get('/api/v5/public/instruments', { ...defaultParam, ...param })
+    this.checkers[ProtocolCheckerType.QueryInstruments].check({ list: res })
+
+    return res
+  }
 }
 
 if (require.main === module) {
   async function wrapper() {
-    const okex = new OkexMarketFetcher(new Pair(new Token('ETH'), new Token('USDT')), { addr: 'http://43.154.53.9' })
-    const res = await okex.queryDepth({ size: 5 })
+    const okex = new OkexMarketFetcher(new Pair(new Token('ETH'), new Token('USDT')))
+    // const res = await okex.queryDepth({ size: 5 })
+    const res = await okex.queryInstruments()
     console.log('res is ', res)
   }
   wrapper()

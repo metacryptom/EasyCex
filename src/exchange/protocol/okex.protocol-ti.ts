@@ -6,6 +6,7 @@ import * as t from "ts-interface-checker";
 
 export const ProtocolCheckerType = t.enumtype({
   "QueryDepthResult": "queryDepth",
+  "QueryInstruments": "queryInstruments",
 });
 
 export const IDepthResult = t.iface([], {
@@ -13,8 +14,21 @@ export const IDepthResult = t.iface([], {
   "bids": t.array(t.tuple("string", "string", "string")),
 });
 
+export const Instruments = t.iface([], {
+  "list": t.array(t.iface([], {
+    "base_currency": "number",
+    "category": "string",
+    "instrument_id": "string",
+    "min_size": "string",
+    "quote_currency": "string",
+    "size_increment": "string",
+    "tick_size": "string",
+  })),
+});
+
 const exportedTypeSuite: t.ITypeSuite = {
   ProtocolCheckerType,
   IDepthResult,
+  Instruments,
 };
 export default exportedTypeSuite;
