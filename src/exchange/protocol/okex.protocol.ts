@@ -37,3 +37,48 @@ export interface IQueryTickersResult {
     ts: string
   }[]
 }
+export interface IGetAcccountBalanceResult {
+  code: string
+  data: {
+    details: {
+      availBal: string
+      availEq: string
+      cashBal: string
+      ccy: string
+      crossLiab: string
+      disEq: string
+      eq: string
+      eqUsd: string
+      frozenBal: string
+      interest: string
+      uTime: string
+    }[]
+    mgnRatio: string
+    totalEq: string
+  }[]
+}
+export interface IGetAssetBalanceResult {
+  code: string
+  data: {
+    availBal: string
+    bal: string
+    ccy: string
+    frozenBal: string
+  }[]
+}
+
+export interface IGetAssetCurrenciesResult {
+  code: string
+  data: {
+    ccy: string
+    name: string
+    chain: string //Chain name, e.g. USDT-ERC20, USDT-TRC20, USDT-Omni
+    canDep: boolean //Availability to deposit from chain.
+    canWd: boolean //Availability to withdraw to chain.
+    canInternal: boolean //Availability to internal transfer.
+    minWd: string //Minimum withdrawal threshold
+    maxFee: string //Minimum withdrawal fee
+    minFee: string //Maximum withdrawal fee
+    mainNet: boolean //If current chain is main net then return true, otherwise return false
+  }[]
+}

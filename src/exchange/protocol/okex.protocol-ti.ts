@@ -44,9 +44,59 @@ export const IQueryTickersResult = t.iface([], {
   })),
 });
 
+export const IGetAcccountBalanceResult = t.iface([], {
+  "code": "string",
+  "data": t.array(t.iface([], {
+    "details": t.array(t.iface([], {
+      "availBal": "string",
+      "availEq": "string",
+      "cashBal": "string",
+      "ccy": "string",
+      "crossLiab": "string",
+      "disEq": "string",
+      "eq": "string",
+      "eqUsd": "string",
+      "frozenBal": "string",
+      "interest": "string",
+      "uTime": "string",
+    })),
+    "mgnRatio": "string",
+    "totalEq": "string",
+  })),
+});
+
+export const IGetAssetBalanceResult = t.iface([], {
+  "code": "string",
+  "data": t.array(t.iface([], {
+    "availBal": "string",
+    "bal": "string",
+    "ccy": "string",
+    "frozenBal": "string",
+  })),
+});
+
+export const IGetAssetCurrenciesResult = t.iface([], {
+  "code": "string",
+  "data": t.array(t.iface([], {
+    "ccy": "string",
+    "name": "string",
+    "chain": "string",
+    "canDep": "boolean",
+    "canWd": "boolean",
+    "canInternal": "boolean",
+    "minWd": "string",
+    "maxFee": "string",
+    "minFee": "string",
+    "mainNet": "boolean",
+  })),
+});
+
 const exportedTypeSuite: t.ITypeSuite = {
   IQueryDepthResult,
   IQueryInstrumentsResult,
   IQueryTickersResult,
+  IGetAcccountBalanceResult,
+  IGetAssetBalanceResult,
+  IGetAssetCurrenciesResult,
 };
 export default exportedTypeSuite;

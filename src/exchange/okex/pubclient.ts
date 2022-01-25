@@ -42,8 +42,8 @@ export class OkexPublicClient {
     this.pbIns = new HttpClient(params.addr, params.timeout, { timeout: params.timeout })
   }
 
-  async commonGet<outputT>(path: string, checker?: Checker, argument?: {}): Promise<outputT> {
-    const res = await this.pbIns.get(path, { ...argument })
+  async commonGet<outputT>(path: string, checker?: Checker, params?: {}): Promise<outputT> {
+    const res = await this.pbIns.get(path, { params })
     if (res.code == '0' || res.code == 0) {
       if (checker) {
         try {
@@ -51,7 +51,7 @@ export class OkexPublicClient {
         } catch (err) {
           throw new ResponseNotExpectedError(
             path,
-            argument,
+            params,
             res,
             `Return code  ${res.code}, check response by ${checker} failed: ${err} `,
           )
@@ -59,7 +59,7 @@ export class OkexPublicClient {
       }
       return res as outputT
     } else {
-      throw new ResponseNotExpectedError(path, argument, res, `Return code  ${res.code} error`)
+      throw new ResponseNotExpectedError(path, params, res, `Return code  ${res.code} error`)
     }
   }
 

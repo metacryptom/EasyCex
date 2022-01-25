@@ -12,9 +12,18 @@ export class HttpClient {
     })
   }
 
-  async get(url: string, params?: object): Promise<any> {
+  async get(url: string, params?: { headers?: any; params?: object }): Promise<any> {
     return this.axiosIns
-      .get(url, { params })
+      .get(url, params)
+      .then((res: { readonly data: any }) => res.data)
+      .catch((error) => {
+        throw error
+      })
+  }
+
+  async post(url: string, body?: object, params?: { headers?: any; params?: object }): Promise<any> {
+    return this.axiosIns
+      .post(url, body, params)
       .then((res: { readonly data: any }) => res.data)
       .catch((error) => {
         throw error
