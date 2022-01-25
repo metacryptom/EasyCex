@@ -9,26 +9,30 @@ export const ProtocolCheckerType = t.enumtype({
   "QueryInstruments": "queryInstruments",
 });
 
-export const IDepthResult = t.iface([], {
-  "asks": t.array(t.tuple("string", "string", "string")),
-  "bids": t.array(t.tuple("string", "string", "string")),
+export const IQueryDepthResult = t.iface([], {
+  "code": "string",
+  "data": t.array(t.iface([], {
+    "asks": t.array(t.tuple("string", "string", "string", "string")),
+    "bids": t.array(t.tuple("string", "string", "string", "string")),
+  })),
 });
 
-export const Instruments = t.iface([], {
-  "list": t.array(t.iface([], {
-    "base_currency": "number",
-    "category": "string",
-    "instrument_id": "string",
-    "min_size": "string",
-    "quote_currency": "string",
-    "size_increment": "string",
-    "tick_size": "string",
+export const IQueryInstrumentsResult = t.iface([], {
+  "code": "string",
+  "data": t.array(t.iface([], {
+    "instType": "string",
+    "instId": "string",
+    "baseCcy": "string",
+    "quoteCcy": "string",
+    "tickSz": "string",
+    "lotSz": "string",
+    "minSz": "string",
   })),
 });
 
 const exportedTypeSuite: t.ITypeSuite = {
   ProtocolCheckerType,
-  IDepthResult,
-  Instruments,
+  IQueryDepthResult,
+  IQueryInstrumentsResult,
 };
 export default exportedTypeSuite;

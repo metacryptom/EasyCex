@@ -5,19 +5,23 @@ export enum ProtocolCheckerType {
 /**
  * The reulst of QueryDepth
  */
-export interface IDepthResult {
-  asks: [string, string, string][]
-  bids: [string, string, string][]
+export interface IQueryDepthResult {
+  code : string
+  data: {
+    asks: [string, string, string,string][]
+    bids: [string, string, string,string][]
+  }[]
 }
 
-export interface Instruments {
-  list: {
-    base_currency: string
-    category: string
-    instrument_id: string
-    min_size: string
-    quote_currency: string
-    size_increment: string
-    tick_size: string
+export interface IQueryInstrumentsResult {
+  code : string
+  data: {
+    instType: string,
+    instId: string,
+    baseCcy: string, //Base currency, e.g. BTC inBTC-USDT
+    quoteCcy : string,//Quote currency, e.g. USDT in BTC-USDT
+    tickSz :string
+    lotSz:string
+    minSz :string
   }[]
 }

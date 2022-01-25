@@ -8,11 +8,31 @@ import {
   QueryDepthResult,
   Token,
 } from '../../base'
-import { PublicClient } from './PublicClient'
 import { createCheckers, Checker } from 'ts-interface-checker'
 import okexTI from '../protocol/okex.protocol-ti'
+import * as okexProtocol from '../protocol/okex.protocol'
 import { ProtocolCheckerType } from '../protocol/okex.protocol'
-import { HttpClient } from './httpclient'
+import { HttpClient } from '../../base/httpclient'
+
+
+
+/**
+ * ResponseNotExpectedError stands for errors happens when response is not as expectd,except for netwrok error
+ */
+export class ResponseNotExpectedError extends Error {
+  public readonly path: string
+  public readonly request :{}
+  public readonly response :{}
+  public readonly message :string
+  
+  constructor(path :string, request:{},response:{},message: string){
+    super(message)
+    this.path = path
+    this.request = request
+    this.response = response
+    Error.captureStackTrace(this);
+  }
+}
 
 export class OkexMarketFetcher implements MarketFetcher {
   readonly pair: Pair
@@ -26,52 +46,68 @@ export class OkexMarketFetcher implements MarketFetcher {
     this.exchangeType = ExchageType.Okex
     this.pbIns = new HttpClient(opt?.addr || 'https://www.okex.com', 3000, { timeout: 3000 })
     this.pairName = `${pair.target.name.toLocaleUpperCase()}-${pair.anchor.name.toLocaleUpperCase()}`
-    const { IDepthResult, Instruments } = createCheckers(okexTI)
+    const { IQueryDepthResult, IQueryInstrumentsResult } = createCheckers(okexTI)
     this.checkers = {
-      [ProtocolCheckerType.QueryDepthResult]: IDepthResult,
-      [ProtocolCheckerType.QueryInstruments]: Instruments,
+      [ProtocolCheckerType.QueryDepthResult]: IQueryDepthResult,
+      [ProtocolCheckerType.QueryInstruments]: IQueryInstrumentsResult,
     }
   }
 
-  async queryDepth(opt?: QueryDepthOption): Promise<QueryDepthResult> {
-    try {
-      const depth = await this.pbIns.get(this.pairName, { size: opt?.size.toString() || '10' /* ,depth:0.1 */ })
-      const res = new QueryDepthResult()
-      this.checkers[ProtocolCheckerType.QueryDepthResult].check(res)
 
-      // data validate
-      if (depth.asks && depth.asks) {
-        for (const ask of depth.asks) {
-          res.asks.push(new DepthInfo(ask))
+
+  async commonGet<outputT> (path :string, checkerType?:ProtocolCheckerType, argument?: {}): Promise<outputT> {
+    const res = await this.pbIns.get(path, {...argument})
+    if( res.code == '0'|| res.code == 0) {
+      if(checkerType){
+        try{
+          this.checkers[checkerType].check(res)
+        }catch(err){
+          throw new ResponseNotExpectedError(path,argument,res,`Return code  ${res.code}, check response by ${checkerType} failed: ${err} `)
         }
-        for (const bid of depth.bids) {
-          res.bids.push(new DepthInfo(bid))
-        }
-        return res
-      } else {
-        return null
       }
-    } catch (err) {
-      console.log('InQueryDepth err is ', err)
+      return  res as outputT
+    }else{
+      throw new ResponseNotExpectedError(path,argument,res,`Return code  ${res.code} error`)
+    }
+
+  }
+
+  async queryDepth(opt?: QueryDepthOption): Promise<QueryDepthResult> {
+    const defaultParam = { sz: '10' ,instId :  this.pairName }
+    const res = new QueryDepthResult()
+    const depth = await this.commonGet<okexProtocol.IQueryDepthResult>('/api/v5/market/books',ProtocolCheckerType.QueryDepthResult,{ ...defaultParam, ...opt } )
+    // convert data
+    if (depth.data[0].asks && depth.data[0].bids) {
+      for (const ask of depth.data[0].asks) {
+        const [price,sz,_,cnt] = ask
+        res.asks.push(new DepthInfo([price,sz,cnt] as any))
+      }
+      for (const bid of depth.data[0].bids) {
+        const [price,sz,_,cnt] = bid
+        res.bids.push(new DepthInfo([price,sz,cnt]  as any))
+      }
+      return res
+    } else {
       return null
     }
   }
 
   async queryInstruments(param?: { readonly instType?: string; readonly instId?: string }) {
     const defaultParam = { instType: 'SPOT' }
-    const res = await this.pbIns.get('/api/v5/public/instruments', { ...defaultParam, ...param })
-    this.checkers[ProtocolCheckerType.QueryInstruments].check({ list: res })
-
-    return res
+    return this.commonGet<okexProtocol.IQueryInstrumentsResult>('/api/v5/public/instruments',ProtocolCheckerType.QueryInstruments,{ ...defaultParam, ...param } )
   }
 }
 
 if (require.main === module) {
   async function wrapper() {
+    try{
     const okex = new OkexMarketFetcher(new Pair(new Token('ETH'), new Token('USDT')))
-    // const res = await okex.queryDepth({ size: 5 })
-    const res = await okex.queryInstruments()
+    const res = await okex.queryDepth({ size: 5 })
+//    const res = await okex.queryInstruments({instId:"ETH-USDT"})
     console.log('res is ', res)
+    }catch(err){
+      console.log ("Error is  ",err,err.response.data)
+    }
   }
   wrapper()
 }
