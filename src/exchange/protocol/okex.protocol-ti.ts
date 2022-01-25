@@ -4,11 +4,6 @@
 import * as t from "ts-interface-checker";
 // tslint:disable:object-literal-key-quotes
 
-export const ProtocolCheckerType = t.enumtype({
-  "QueryDepthResult": "queryDepth",
-  "QueryInstruments": "queryInstruments",
-});
-
 export const IQueryDepthResult = t.iface([], {
   "code": "string",
   "data": t.array(t.iface([], {
@@ -30,9 +25,28 @@ export const IQueryInstrumentsResult = t.iface([], {
   })),
 });
 
+export const IQueryTickersResult = t.iface([], {
+  "code": "string",
+  "data": t.array(t.iface([], {
+    "instType": "string",
+    "instId": "string",
+    "last": "string",
+    "lastSz": "string",
+    "askPx": "string",
+    "askSz": "string",
+    "bidPx": "string",
+    "open24h": "string",
+    "high24h": "string",
+    "low24h": "string",
+    "volCcy24h": "string",
+    "vol24h": "string",
+    "ts": "string",
+  })),
+});
+
 const exportedTypeSuite: t.ITypeSuite = {
-  ProtocolCheckerType,
   IQueryDepthResult,
   IQueryInstrumentsResult,
+  IQueryTickersResult,
 };
 export default exportedTypeSuite;
