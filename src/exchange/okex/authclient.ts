@@ -4,14 +4,8 @@ import okexTI from '../protocol/okex.protocol-ti'
 import * as okexProtocol from '../protocol/okex.protocol'
 import { HttpClient } from '../../base/httpclient'
 import { ResponseNotExpectedError } from './pubclient'
-const {
-  IQueryDepthResult,
-  IQueryInstrumentsResult,
-  IQueryTickersResult,
-  IGetAcccountBalanceResult,
-  IGetAssetBalanceResult,
-  IGetAssetCurrenciesResult,
-} = createCheckers(okexTI)
+const { IGetAcccountBalanceResult, IGetAssetBalanceResult, IGetAssetCurrenciesResult, IGetHistoryOrderListResult } =
+  createCheckers(okexTI)
 
 export class AuthError extends Error {
   public readonly path: string
@@ -183,6 +177,41 @@ export class OkexAuthClient {
     )
     return res
   }
+  /**
+   * Retrieve the completed order data for the last 7 days, and the incomplete orders that have been cancelled are only reserved for 2 hours.
+   * Rate Limit: 40 requests per 2 seconds
+   * Rate limit rule: UserID
+   * see  https://www.okx.com/docs-v5/en/#rest-api-trade-get-order-history-last-7-days
+   * @param ordType market: market order ,limit: limit order,post_only: Post-only order,fok: Fill-or-kill order,ioc: Immediate-or-cancel order,optimal_limit_ioc :Market order with immediate-or-cancel order
+   * @param after Pagination of data to return records earlier than the requested ordId
+   * @param before Pagination of data to return records newer than the requested ordId
+   * @param limit Number of results per request. The maximum is 100; The default is 100
+   */
+  async getHistoryOrders(param: {
+    ordType?: string | string[]
+    state?: 'canceled' | 'filled'
+    before?: string
+    after?: string
+    limit?: string
+  }) {
+    const defaultParam = {
+      instType: 'SPOT',
+      state: 'filled',
+      after: '',
+      before: '',
+      ordType: '',
+      limit: '100',
+    }
+    const res = await this.commonGet<okexProtocol.IGetHistoryOrderListResult>(
+      '/api/v5/trade/orders-history',
+      IGetHistoryOrderListResult,
+      {
+        ...defaultParam,
+        ...param,
+      },
+    )
+    return res
+  }
   //TODO:
   ///api/v5/trade/order
   ///api/v5/trade/order?
@@ -203,7 +232,7 @@ if (require.main === module) {
         },
       })
 
-      const res = await okex.getAseetBalance('ETH')
+      const res = await okex.getHistoryOrders({})
       //    const res = await okex.queryInstruments({instId:"ETH-USDT"})
       console.log('res is ', res.data)
     } catch (err) {

@@ -82,3 +82,47 @@ export interface IGetAssetCurrenciesResult {
     mainNet: boolean //If current chain is main net then return true, otherwise return false
   }[]
 }
+
+export interface IOrderInfo {
+  instType: string
+  instId: string
+  ccy: string
+  ordId: string
+  clOrdId: string
+  tag: string
+  px: string
+  sz: string
+  ordType: string
+  side: string
+  posSide: string
+  tdMode: string
+  accFillSz: string
+  fillPx: string
+  tradeId: string
+  fillSz: string
+  fillTime: string
+  state: string
+  avgPx: string
+  lever: string
+  tpTriggerPx: string
+  tpTriggerPxType: string
+  tpOrdPx: string
+  slTriggerPx: string
+  slTriggerPxType: string
+  slOrdPx: string
+  feeCcy: string
+  fee: string
+  rebateCcy: string
+  source: string
+  rebate: string
+  tgtCcy: string
+  pnl: string
+  category: string
+  uTime: string
+  cTime: string
+}
+
+export interface IGetHistoryOrderListResult {
+  code: string
+  data: IOrderInfo[]
+}

@@ -91,6 +91,50 @@ export const IGetAssetCurrenciesResult = t.iface([], {
   })),
 });
 
+export const IOrderInfo = t.iface([], {
+  "instType": "string",
+  "instId": "string",
+  "ccy": "string",
+  "ordId": "string",
+  "clOrdId": "string",
+  "tag": "string",
+  "px": "string",
+  "sz": "string",
+  "ordType": "string",
+  "side": "string",
+  "posSide": "string",
+  "tdMode": "string",
+  "accFillSz": "string",
+  "fillPx": "string",
+  "tradeId": "string",
+  "fillSz": "string",
+  "fillTime": "string",
+  "state": "string",
+  "avgPx": "string",
+  "lever": "string",
+  "tpTriggerPx": "string",
+  "tpTriggerPxType": "string",
+  "tpOrdPx": "string",
+  "slTriggerPx": "string",
+  "slTriggerPxType": "string",
+  "slOrdPx": "string",
+  "feeCcy": "string",
+  "fee": "string",
+  "rebateCcy": "string",
+  "source": "string",
+  "rebate": "string",
+  "tgtCcy": "string",
+  "pnl": "string",
+  "category": "string",
+  "uTime": "string",
+  "cTime": "string",
+});
+
+export const IGetHistoryOrderListResult = t.iface([], {
+  "code": "string",
+  "data": t.array("IOrderInfo"),
+});
+
 const exportedTypeSuite: t.ITypeSuite = {
   IQueryDepthResult,
   IQueryInstrumentsResult,
@@ -98,5 +142,7 @@ const exportedTypeSuite: t.ITypeSuite = {
   IGetAcccountBalanceResult,
   IGetAssetBalanceResult,
   IGetAssetCurrenciesResult,
+  IOrderInfo,
+  IGetHistoryOrderListResult,
 };
 export default exportedTypeSuite;
